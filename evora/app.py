@@ -3,12 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Awaitable, Callable, Optional, Type
 
+from evora.observability.telemetry import NoopTelemetry, Telemetry
+
 from .brokers.base import BaseBroker, Message
 from .core import Envelope, Event, Registry
 from .errors import ContractError, FatalError, RetryableError
 from .idempotency import IdempotencyPolicy, IdempotencyStore
 from .runtime import RetryPolicy
-from evora.observability.telemetry import NoopTelemetry, Telemetry
 
 
 @dataclass
@@ -42,11 +43,14 @@ def subscribe(
     """
     Strict mode: idempotency policy is required; missing => startup error.
     """
+
     def decorator(fn: Callable[..., Awaitable[None]]):
         fn.__evora_spec__ = {
             "event_cls": event_cls,
             "channel": channel,
-            "retry": RetryPolicy(strategy=retry, max_attempts=max_attempts) if isinstance(retry, str) else retry,
+            "retry": RetryPolicy(strategy=retry, max_attempts=max_attempts)
+            if isinstance(retry, str)
+            else retry,
             "dlq": dlq,
             "idempotency": idempotency,
         }
@@ -95,7 +99,8 @@ class App:
         idem: IdempotencyPolicy | None = spec.get("idempotency")
         if self.strict and idem is None:
             raise ValueError(
-                f"Handler {fn.__module__}.{fn.__name__} must declare idempotency=IdempotencyPolicy(...) in strict mode."
+                f"Handler {fn.__module__}.{fn.__name__} must declare "
+                f"idempotency=IdempotencyPolicy(...) in strict mode."
             )
 
         # Registry needs event type → model mapping
@@ -153,7 +158,9 @@ class App:
             "failed_handler": handler_name,
             "original_channel": msg.channel,
         }
-        await self.broker.publish(dlq_channel, value=self.registry.encode(envelope), key=msg.key, headers=msg.headers)
+        await self.broker.publish(
+            dlq_channel, value=self.registry.encode(envelope), key=msg.key, headers=msg.headers
+        )
 
     def _classify_error(self, err: Exception) -> str:
         """
@@ -178,7 +185,7 @@ class App:
         # Decode/validate envelope + event model
         try:
             envelope, event = self.registry.decode(msg.value)
-        except Exception as e:
+        except Exception:
             # Invalid payloads are contract failures — send to DLQ of the channel itself
             # (no specific handler yet). This is strict and operationally useful.
             # If you prefer a global DLQ, you can route to "evora.contract.dlq".
@@ -186,9 +193,13 @@ class App:
             # Best-effort: wrap minimal envelope-like metadata
             # but keep the raw bytes for inspection (truncate if needed)
             try:
-                raw_meta = {"error_type": type(e).__name__, "error_message": str(e), "original_channel": msg.channel}
                 # If bytes aren't json, this will still be a "contract" DLQ message.
-                await self.broker.publish(fake_dlq, value=msg.value, key=msg.key, headers={**msg.headers, "x-error": "contract"})
+                await self.broker.publish(
+                    fake_dlq,
+                    value=msg.value,
+                    key=msg.key,
+                    headers={**msg.headers, "x-error": "contract"},
+                )
             finally:
                 return
 
@@ -224,7 +235,9 @@ class App:
             scope = handler_name
             if h.idempotency.mode != "event_id":
                 # Reserved for future modes
-                self.telemetry.on_consume_end(token, outcome="error", error=ValueError("Unsupported idempotency mode"))
+                self.telemetry.on_consume_end(
+                    token, outcome="error", error=ValueError("Unsupported idempotency mode")
+                )
                 raise ValueError(f"Unsupported idempotency mode: {h.idempotency.mode}")
 
             try:
@@ -251,7 +264,9 @@ class App:
                     # - retryable/unknown
                     # - attempts left
                     # - broker supports schedule_retry
-                    can_retry = category in ("retryable", "unknown") and attempt < h.retry.max_attempts
+                    can_retry = (
+                        category in ("retryable", "unknown") and attempt < h.retry.max_attempts
+                    )
 
                     if can_retry:
                         await self.broker.schedule_retry(
@@ -275,20 +290,30 @@ class App:
 
                     # Otherwise DLQ (contract/fatal OR retry exhausted)
                     if h.dlq:
-                        await self._send_dlq(handler=h, msg=msg, envelope=envelope, handler_name=handler_name, error=e)
+                        await self._send_dlq(
+                            handler=h,
+                            msg=msg,
+                            envelope=envelope,
+                            handler_name=handler_name,
+                            error=e,
+                        )
                         self.telemetry.on_consume_end(token, outcome="dlq", error=e)
                     else:
                         self.telemetry.on_consume_end(token, outcome="error", error=e)
                     continue
 
                 # Success: mark idempotency
-                await self.idempotency_store.mark_seen(scope=scope, event_id=envelope.id, ttl_seconds=h.idempotency.ttl_seconds)
+                await self.idempotency_store.mark_seen(
+                    scope=scope, event_id=envelope.id, ttl_seconds=h.idempotency.ttl_seconds
+                )
                 self.telemetry.on_consume_end(token, outcome="success", error=None)
 
             except Exception as e:
                 # If idempotency store fails or unexpected pipeline issues occur
                 if h.dlq:
-                    await self._send_dlq(handler=h, msg=msg, envelope=envelope, handler_name=handler_name, error=e)
+                    await self._send_dlq(
+                        handler=h, msg=msg, envelope=envelope, handler_name=handler_name, error=e
+                    )
                     self.telemetry.on_consume_end(token, outcome="dlq", error=e)
                 else:
                     self.telemetry.on_consume_end(token, outcome="error", error=e)

@@ -8,8 +8,8 @@ import os
 import sys
 from typing import Any, Tuple
 
-from evora.schema.extractor import extract_schema
 from evora.schema.diff import compare_schemas
+from evora.schema.extractor import extract_schema
 
 
 def main() -> int:
@@ -24,12 +24,24 @@ def main() -> int:
     check_parser.add_argument("old", help="module:Event or file.py:Event or baseline.json")
     check_parser.add_argument("new", help="module:Event or file.py:Event")
     check_parser.add_argument("--format", choices=["text", "json"], default="text")
-    check_parser.add_argument("--require-version-bump", action="store_true", default=True,
-                              help="Fail if breaking changes without __version__ increase (default: true)")
-    check_parser.add_argument("--no-require-version-bump", dest="require_version_bump", action="store_false")
-    check_parser.add_argument("--enforce-event-type", action="store_true", default=True,
-                              help="Fail if event_type differs (default: true)")
-    check_parser.add_argument("--no-enforce-event-type", dest="enforce_event_type", action="store_false")
+    check_parser.add_argument(
+        "--require-version-bump",
+        action="store_true",
+        default=True,
+        help="Fail if breaking changes without __version__ increase (default: true)",
+    )
+    check_parser.add_argument(
+        "--no-require-version-bump", dest="require_version_bump", action="store_false"
+    )
+    check_parser.add_argument(
+        "--enforce-event-type",
+        action="store_true",
+        default=True,
+        help="Fail if event_type differs (default: true)",
+    )
+    check_parser.add_argument(
+        "--no-enforce-event-type", dest="enforce_event_type", action="store_false"
+    )
 
     # evora schema export <ref>
     export_parser = schema_sub.add_parser("export", help="Export normalized schema to JSON")
@@ -57,6 +69,7 @@ def main() -> int:
 # ---------------------------------------------------------------------
 # Commands
 # ---------------------------------------------------------------------
+
 
 def handle_schema_export(ref: str, out: str) -> int:
     try:
@@ -150,6 +163,7 @@ def handle_schema_check(
 # Output
 # ---------------------------------------------------------------------
 
+
 def _emit(
     fmt: str,
     *,
@@ -198,6 +212,7 @@ def _emit(
 # ---------------------------------------------------------------------
 # Loading helpers
 # ---------------------------------------------------------------------
+
 
 def _load_event_or_baseline(ref: str, *, allow_baseline: bool) -> Tuple[Any, dict[str, Any]]:
     # Baseline JSON
@@ -266,6 +281,7 @@ def _load_from_file(path: str, class_name: str):
     if not hasattr(module, class_name):
         raise AttributeError(f"{class_name} not found in {path}")
     return getattr(module, class_name)
+
 
 if __name__ == "__main__":
     raise SystemExit(main())

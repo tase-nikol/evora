@@ -1,8 +1,8 @@
 # 🎯 Evora Reliability Core - Implementation Complete
 
-**Date:** March 1, 2026  
+**Date:** March 3, 2026  
 **Status:** ✅ Production-Ready Redis Backend  
-**Version:** 0.2.0 (Reliability Core)
+**Version:** 0.2.0 (Reliability Core + Schema Governance)
 
 ---
 
@@ -169,14 +169,13 @@ Decision:
 
 | Feature | Status | Priority |
 |---------|--------|----------|
-| OpenTelemetry tracing | 🔲 | High |
-| Metrics (Prometheus) | 🔲 | High |
-| Structured logging | 🔲 | Medium |
-| Schema compatibility checks | 🔲 | High |
-| Schema governance CLI | 🔲 | High |
-| Outbox pattern | 🔲 | High |
-| Admin CLI tools | 🔲 | Medium |
-| PEL monitoring dashboard | 🔲 | Low |
+| OpenTelemetry tracing | 🚧 In Progress | High |
+| Metrics (Prometheus) | 🚧 In Progress | High |
+| Structured logging | 🔲 Planned | Medium |
+| Outbox pattern | 🔲 Planned | High |
+| Admin CLI tools | 🔲 Planned | Medium |
+| PEL monitoring dashboard | 🔲 Planned | Low |
+| Kafka broker | 🔲 Planned | Medium |
 
 ---
 

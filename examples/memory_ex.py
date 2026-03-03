@@ -1,7 +1,7 @@
-import anyio
-
-import sys
 import os
+import sys
+
+import anyio
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 

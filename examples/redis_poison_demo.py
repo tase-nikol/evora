@@ -21,7 +21,6 @@ from evora.errors import RetryableError
 from evora.idempotency import IdempotencyPolicy
 from evora.idempotency_redis import RedisIdempotencyStore
 
-
 # ============================================================================
 # Domain Events
 # ============================================================================
@@ -264,7 +263,7 @@ async def run_consumer():
     print("🚀 STARTING CONSUMER")
     print("=" * 70)
     print(f"Service: {app.source}")
-    print(f"Poison detection:")
+    print("Poison detection:")
     print(f"  - Idle threshold: {app.broker.poison_idle_ms}ms")
     print(f"  - Max deliveries: {app.broker.poison_max_deliveries}")
     print(f"  - Check interval: {app.broker.poison_check_interval_s}s")

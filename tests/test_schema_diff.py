@@ -1,8 +1,10 @@
-from pydantic import BaseModel
-from evora.core import Event
-from evora.schema.extractor import extract_schema
-from evora.schema.diff import compare_schemas
 from enum import Enum
+
+from pydantic import BaseModel
+
+from evora.core import Event
+from evora.schema.diff import compare_schemas
+from evora.schema.extractor import extract_schema
 
 
 class V1(Event):
@@ -46,6 +48,7 @@ class V2_RemoveField(Event):
     def event_type(cls):
         return "users.events"
 
+
 class V2_TypeChange(Event):
     __version__ = 2
 
@@ -59,14 +62,17 @@ class V2_TypeChange(Event):
     def event_type(cls):
         return "users.events"
 
+
 class StatusV1(Enum):
     A = "A"
     B = "B"
+
 
 class StatusV2(Enum):
     A = "A"
     B = "B"
     C = "C"
+
 
 class EnumV1(Event):
     __version__ = 1
@@ -93,6 +99,7 @@ class EnumV2_Add(Event):
     def event_type(cls):
         return "enum.events"
 
+
 class NestedV1(Event):
     __version__ = 1
 
@@ -118,6 +125,7 @@ class NestedV2_Remove(Event):
     def event_type(cls):
         return "nested.events"
 
+
 def test_add_optional_field_is_compatible():
     old = extract_schema(V1)
     new = extract_schema(V2_AddOptional)
@@ -137,6 +145,7 @@ def test_remove_field_is_breaking():
     assert not result.is_compatible
     assert any("name removed" in x for x in result.breaking_changes)
 
+
 def test_type_change_is_breaking():
     old = extract_schema(V1)
     new = extract_schema(V2_TypeChange)
@@ -145,6 +154,7 @@ def test_type_change_is_breaking():
 
     assert not result.is_compatible
     assert any("type changed" in x for x in result.breaking_changes)
+
 
 def test_enum_add_value_is_non_breaking():
     old = extract_schema(EnumV1)

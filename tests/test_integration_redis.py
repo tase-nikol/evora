@@ -1,6 +1,6 @@
-import pytest
 import asyncio
 
+import pytest
 import redis.asyncio as redis
 from pydantic import BaseModel
 
@@ -50,8 +50,7 @@ async def test_retry_then_success():
 
     state = {"calls": 0}
 
-    @subscribe(TestEvent, max_attempts=2,
-               idempotency=IdempotencyPolicy(mode="event_id"))
+    @subscribe(TestEvent, max_attempts=2, idempotency=IdempotencyPolicy(mode="event_id"))
     async def handler(event, ctx):
         state["calls"] += 1
         if state["calls"] == 1:
