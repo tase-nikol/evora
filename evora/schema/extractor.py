@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any, Type
+
 from evora.core import Event
 
 
@@ -21,6 +22,7 @@ def extract_schema(event_cls: Type[Event]) -> dict[str, Any]:
 # $ref resolution
 # -----------------------------------------
 
+
 def _resolve_refs(schema: dict[str, Any], defs: dict[str, Any]) -> dict[str, Any]:
     if "$ref" in schema:
         ref = schema["$ref"]
@@ -34,10 +36,7 @@ def _resolve_refs(schema: dict[str, Any], defs: dict[str, Any]) -> dict[str, Any
         if isinstance(v, dict):
             resolved[k] = _resolve_refs(v, defs)
         elif isinstance(v, list):
-            resolved[k] = [
-                _resolve_refs(i, defs) if isinstance(i, dict) else i
-                for i in v
-            ]
+            resolved[k] = [_resolve_refs(i, defs) if isinstance(i, dict) else i for i in v]
         else:
             resolved[k] = v
 
@@ -47,6 +46,7 @@ def _resolve_refs(schema: dict[str, Any], defs: dict[str, Any]) -> dict[str, Any
 # -----------------------------------------
 # Structural normalization
 # -----------------------------------------
+
 
 def _normalize_schema(schema: dict[str, Any]) -> dict[str, Any]:
     result: dict[str, Any] = {}

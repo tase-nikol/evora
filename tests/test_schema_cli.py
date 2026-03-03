@@ -1,16 +1,18 @@
 import json
 import subprocess
 import sys
-from pathlib import Path
 import textwrap
+from pathlib import Path
 
 
 def write_file(path: Path, content: str):
     path.write_text(textwrap.dedent(content).strip() + "\n", encoding="utf-8")
 
+
 # ---------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------
+
 
 def run_cli(args, cwd):
     cmd = [sys.executable, "-m", "evora.cli"] + args
@@ -26,11 +28,14 @@ def run_cli(args, cwd):
 # Tests
 # ---------------------------------------------------------------------
 
+
 def test_breaking_change_requires_version_bump(tmp_path):
     v1 = tmp_path / "v1.py"
     v2 = tmp_path / "v2.py"
 
-    write_file(v1, """
+    write_file(
+        v1,
+        """
     from evora.core import Event
     from pydantic import BaseModel
     
@@ -45,9 +50,12 @@ def test_breaking_change_requires_version_bump(tmp_path):
         @classmethod
         def event_type(cls):
             return "users.events"
-    """)
+    """,
+    )
 
-    write_file(v2, """
+    write_file(
+        v2,
+        """
     from evora.core import Event
     from pydantic import BaseModel
     
@@ -62,7 +70,8 @@ def test_breaking_change_requires_version_bump(tmp_path):
         @classmethod
         def event_type(cls):
             return "users.events"
-    """)
+    """,
+    )
 
     result = run_cli(
         ["schema", "check", f"{v1}:MyEvent", f"{v2}:MyEvent", "--format", "json"],
@@ -80,7 +89,9 @@ def test_baseline_export_and_check(tmp_path):
     v1 = tmp_path / "v1.py"
     baseline = tmp_path / "baseline.json"
 
-    write_file(v1, """
+    write_file(
+        v1,
+        """
     from evora.core import Event
     from pydantic import BaseModel
     
@@ -95,7 +106,8 @@ def test_baseline_export_and_check(tmp_path):
         @classmethod
         def event_type(cls):
             return "users.events"
-    """)
+    """,
+    )
 
     # Export baseline
     export = run_cli(
@@ -121,7 +133,9 @@ def test_event_type_mismatch_fails(tmp_path):
     v1 = tmp_path / "v1.py"
     v2 = tmp_path / "v2.py"
 
-    write_file(v1, """
+    write_file(
+        v1,
+        """
     from evora.core import Event
     from pydantic import BaseModel
     
@@ -136,9 +150,12 @@ def test_event_type_mismatch_fails(tmp_path):
         @classmethod
         def event_type(cls):
             return "a.events"
-    """)
+    """,
+    )
 
-    write_file(v2, """
+    write_file(
+        v2,
+        """
     from evora.core import Event
     from pydantic import BaseModel
     
@@ -153,7 +170,8 @@ def test_event_type_mismatch_fails(tmp_path):
         @classmethod
         def event_type(cls):
             return "b.events"
-    """)
+    """,
+    )
 
     result = run_cli(
         ["schema", "check", f"{v1}:A", f"{v2}:B", "--format", "json"],
@@ -169,7 +187,9 @@ def test_non_breaking_change_is_ok(tmp_path):
     v1 = tmp_path / "v1.py"
     v2 = tmp_path / "v2.py"
 
-    write_file(v1, """
+    write_file(
+        v1,
+        """
     from evora.core import Event
     from pydantic import BaseModel
     
@@ -184,9 +204,12 @@ def test_non_breaking_change_is_ok(tmp_path):
         @classmethod
         def event_type(cls):
             return "users.events"
-    """)
+    """,
+    )
 
-    write_file(v2, """
+    write_file(
+        v2,
+        """
     from evora.core import Event
     from pydantic import BaseModel
     
@@ -202,7 +225,8 @@ def test_non_breaking_change_is_ok(tmp_path):
         @classmethod
         def event_type(cls):
             return "users.events"
-    """)
+    """,
+    )
 
     result = run_cli(
         ["schema", "check", f"{v1}:MyEvent", f"{v2}:MyEvent", "--format", "json"],

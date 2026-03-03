@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+
 from .compatibility import CompatibilityResult
 
 
@@ -25,11 +26,8 @@ def _compare_objects(
     breaking: list[str],
     non_breaking: list[str],
 ) -> None:
-
     if old.get("type") != new.get("type"):
-        breaking.append(
-            f"{path or 'root'}: type changed {old.get('type')} → {new.get('type')}"
-        )
+        breaking.append(f"{path or 'root'}: type changed {old.get('type')} → {new.get('type')}")
         return
 
     # Enum comparison

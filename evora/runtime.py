@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import random
-import anyio
 from dataclasses import dataclass
 from typing import Awaitable, Callable
+
+import anyio
 
 
 @dataclass
@@ -18,11 +19,13 @@ class RetryPolicy:
         max_delay_ms: Maximum delay in milliseconds between attempts.
         jitter: Whether to apply random jitter to the delay.
     """
-    strategy: str = "exponential"   # none|fixed|exponential
+
+    strategy: str = "exponential"  # none|fixed|exponential
     max_attempts: int = 5
     base_delay_ms: int = 200
     max_delay_ms: int = 30_000
     jitter: bool = True
+
 
 class IdempotencyStore:
     """
@@ -32,6 +35,7 @@ class IdempotencyStore:
         seen: Check if an event-handler pair has been seen.
         mark_seen: Mark an event-handler pair as seen with an optional TTL.
     """
+
     async def seen(self, *, event_id: str, handler_name: str) -> bool:
         """
         Check if the given event_id and handler_name have already been processed.
@@ -45,7 +49,9 @@ class IdempotencyStore:
         """
         return False
 
-    async def mark_seen(self, *, event_id: str, handler_name: str, ttl_seconds: int = 86_400) -> None:
+    async def mark_seen(
+        self, *, event_id: str, handler_name: str, ttl_seconds: int = 86_400
+    ) -> None:
         """
         Mark the given event_id and handler_name as processed.
 
@@ -55,6 +61,7 @@ class IdempotencyStore:
             ttl_seconds: Time-to-live in seconds for the record.
         """
         return None
+
 
 def _compute_delay_ms(policy: RetryPolicy, attempt: int) -> int:
     """
@@ -78,6 +85,7 @@ def _compute_delay_ms(policy: RetryPolicy, attempt: int) -> int:
     if policy.jitter:
         delay = int(delay * random.uniform(0.7, 1.3))
     return max(0, delay)
+
 
 async def with_retries(
     *,

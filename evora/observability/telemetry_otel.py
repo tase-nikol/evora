@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from typing import Any
-from opentelemetry import trace, metrics
-from opentelemetry.trace import Span
+
+from opentelemetry import metrics, trace
 from opentelemetry.metrics import Meter
+from opentelemetry.trace import Span
 
 
 class OpenTelemetryTelemetry:
@@ -16,18 +17,10 @@ class OpenTelemetryTelemetry:
         self.meter = meter or metrics.get_meter("evora")
 
         # Metrics
-        self._consume_counter = self.meter.create_counter(
-            "evora_consume_total"
-        )
-        self._retry_counter = self.meter.create_counter(
-            "evora_retry_total"
-        )
-        self._publish_counter = self.meter.create_counter(
-            "evora_publish_total"
-        )
-        self._duration_histogram = self.meter.create_histogram(
-            "evora_handler_duration_seconds"
-        )
+        self._consume_counter = self.meter.create_counter("evora_consume_total")
+        self._retry_counter = self.meter.create_counter("evora_retry_total")
+        self._publish_counter = self.meter.create_counter("evora_publish_total")
+        self._duration_histogram = self.meter.create_histogram("evora_handler_duration_seconds")
 
     # ----------------------------
     # Telemetry API

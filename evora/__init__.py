@@ -1,6 +1,6 @@
 from .app import App, subscribe
 from .core import Event
-from .errors import RetryableError, FatalError, ContractError
+from .errors import ContractError, FatalError, RetryableError
 from .idempotency import IdempotencyPolicy
 from .observability import SimpleMetricsTelemetry
 from .observability.telemetry import Telemetry
@@ -16,4 +16,3 @@ __all__ = [
     "Telemetry",
     "SimpleMetricsTelemetry",
 ]
-

@@ -26,12 +26,13 @@ Message Flow:
 
 from __future__ import annotations
 
+import json
 import os
 import time
-import json
-import anyio
 from dataclasses import dataclass
 from typing import Awaitable, Callable
+
+import anyio
 import redis.asyncio as redis
 
 from .base import Message
@@ -78,6 +79,7 @@ def _compute_delay_ms(attempt: int, base: int = 500, max_delay: int = 30000) -> 
     """
     delay = base * (2 ** (attempt - 1))
     return min(delay, max_delay)
+
 
 @dataclass
 class RedisStreamsBroker:
@@ -176,6 +178,7 @@ class RedisStreamsBroker:
 
         The broker focuses purely on message transport and durability.
     """
+
     client: redis.Redis
     group_id: str
     consumer_name: str | None = None
@@ -215,14 +218,14 @@ class RedisStreamsBroker:
         return self.consumer_name or f"{os.uname().nodename}-{os.getpid()}"
 
     async def schedule_retry(
-            self,
-            *,
-            msg: Message,
-            raw_value: bytes,
-            headers: dict[str, str],
-            attempt: int,
-            error_type: str,
-            error_message: str,
+        self,
+        *,
+        msg: Message,
+        raw_value: bytes,
+        headers: dict[str, str],
+        attempt: int,
+        error_type: str,
+        error_message: str,
     ) -> None:
         """
         Schedule a failed message for durable retry using Redis ZSET delay queue.
@@ -282,8 +285,9 @@ class RedisStreamsBroker:
             - retry_scheduler(): Background task that processes the ZSET
             - _compute_delay_ms(): Exponential backoff calculation
         """
-        delay_ms = _compute_delay_ms(attempt)
-        due = _now_ms() + _compute_delay_ms(attempt, base=self.base_delay_ms, max_delay=self.max_delay_ms)
+        due = _now_ms() + _compute_delay_ms(
+            attempt, base=self.base_delay_ms, max_delay=self.max_delay_ms
+        )
 
         payload = {
             "channel": msg.channel,
@@ -306,11 +310,11 @@ class RedisStreamsBroker:
         await pipe.execute()
 
     async def _reclaim_stuck(
-            self,
-            channel: str,
-            *,
-            min_idle_ms: int,
-            count: int = 50,
+        self,
+        channel: str,
+        *,
+        min_idle_ms: int,
+        count: int = 50,
     ) -> list[tuple[str, dict]]:
         """
         Reclaim stuck messages from the Pending Entry List (PEL) to prevent poison messages.
@@ -504,11 +508,17 @@ class RedisStreamsBroker:
         key = key or None
 
         attempt_b = fields.get(b"a") or fields.get("a") or b"1"
-        attempt = int(attempt_b.decode("utf-8")) if isinstance(attempt_b, (bytes, bytearray)) else int(attempt_b)
+        attempt = (
+            int(attempt_b.decode("utf-8"))
+            if isinstance(attempt_b, (bytes, bytearray))
+            else int(attempt_b)
+        )
 
         hdr_b = fields.get(b"h") or fields.get("h") or b"{}"
         try:
-            headers = json.loads(hdr_b.decode("utf-8") if isinstance(hdr_b, (bytes, bytearray)) else str(hdr_b))
+            headers = json.loads(
+                hdr_b.decode("utf-8") if isinstance(hdr_b, (bytes, bytearray)) else str(hdr_b)
+            )
         except Exception:
             headers = {}
 
@@ -517,7 +527,9 @@ class RedisStreamsBroker:
             value=raw if isinstance(raw, (bytes, bytearray)) else bytes(raw),
             headers=headers,
             key=key,
-            message_id=msg_id.decode("utf-8") if isinstance(msg_id, (bytes, bytearray)) else str(msg_id),
+            message_id=msg_id.decode("utf-8")
+            if isinstance(msg_id, (bytes, bytearray))
+            else str(msg_id),
             attempt=attempt,
         )
 
@@ -637,7 +649,6 @@ class RedisStreamsBroker:
                 },
             )
             await self.client.xack(msg.channel, self.group_id, raw_msg_id)
-
 
     async def publish(
         self,
@@ -790,7 +801,9 @@ class RedisStreamsBroker:
         """
         try:
             # Create group at beginning of stream, Start consuming only new messages from now on.
-            await self.client.xgroup_create(name=channel, groupname=self.group_id, id="$", mkstream=self.mkstream)
+            await self.client.xgroup_create(
+                name=channel, groupname=self.group_id, id="$", mkstream=self.mkstream
+            )
         except Exception as e:
             # BUSYGROUP means it exists
             if "BUSYGROUP" in str(e):
@@ -926,8 +939,6 @@ class RedisStreamsBroker:
         for ch in channels:
             await self._ensure_group(ch)
 
-        consumer = self._consumer()
-
         async def retry_scheduler() -> None:
             """
             Background task: moves due retry entries from ZSET back to stream.
@@ -984,8 +995,13 @@ class RedisStreamsBroker:
                 now = _now_ms()
                 for ch in channels:
                     zkey = ch + self.retry_zset_suffix
-                    due_members = await self.client.zrangebyscore(zkey,"-inf",now,start=0,num=100,)
-
+                    due_members = await self.client.zrangebyscore(
+                        zkey,
+                        "-inf",
+                        now,
+                        start=0,
+                        num=100,
+                    )
 
                     if not due_members:
                         continue
@@ -1088,7 +1104,9 @@ class RedisStreamsBroker:
                 reclaimed_work: list[tuple[str, str, dict]] = []
 
                 for ch in channels:
-                    reclaimed = await self._reclaim_stuck(ch, min_idle_ms=self.poison_idle_ms, count=25)
+                    reclaimed = await self._reclaim_stuck(
+                        ch, min_idle_ms=self.poison_idle_ms, count=25
+                    )
                     for mid, fields in reclaimed:
                         reclaimed_work.append((ch, mid, fields))
 
@@ -1113,7 +1131,11 @@ class RedisStreamsBroker:
                     continue
 
                 for stream_name, entries in resp:
-                    ch = stream_name.decode("utf-8") if isinstance(stream_name, (bytes, bytearray)) else stream_name
+                    ch = (
+                        stream_name.decode("utf-8")
+                        if isinstance(stream_name, (bytes, bytearray))
+                        else stream_name
+                    )
                     for mid, fields in entries:
                         msg = await self._decode_entry(ch, mid, fields)
                         if msg is None:
@@ -1123,4 +1145,3 @@ class RedisStreamsBroker:
         async with anyio.create_task_group() as tg:
             tg.start_soon(loop)
             tg.start_soon(retry_scheduler)
-
