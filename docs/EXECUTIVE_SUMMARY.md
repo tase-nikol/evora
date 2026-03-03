@@ -184,9 +184,11 @@ except InvalidCardError:
 | Poison Detection | ✅ Complete | ✅ Yes |
 | Consumer Groups | ✅ Complete | ✅ Yes |
 | Structured DLQ | ✅ Complete | ✅ Yes |
-| OpenTelemetry | 🚧 Planned | ⏳ v0.4.0 |
-| Schema Governance | 🚧 Planned | ⏳ v0.3.0 |
-| Outbox Pattern | 🚧 Planned | ⏳ v0.5.0 |
+| Schema Governance CLI | ✅ Complete | ✅ Yes |
+| Schema Compatibility | ✅ Complete | ✅ Yes |
+| OpenTelemetry | 🚧 In Progress | ⏳ v0.3.0 |
+| Prometheus Metrics | 🚧 In Progress | ⏳ v0.3.0 |
+| Outbox Pattern | 🚧 Planned | ⏳ v0.4.0 |
 
 **Recommendation:** Redis backend is production-ready for pilot deployments.
 
@@ -264,36 +266,6 @@ ROI: 94% cost reduction per service
 
 ---
 
-## 🚀 Roadmap
-
-### ✅ **Phase 1: Reliability Core** (Completed - v0.2.0)
-- Strict mode enforcement
-- Durable retry
-- Poison detection
-- Idempotency
-- Consumer groups
-- **Timeline:** Completed Feb-March 2026
-
-### 🚧 **Phase 2: Governance** (In Progress - v0.3.0)
-- Schema compatibility checks
-- Breaking change detection
-- Schema governance CLI
-- **Timeline:** April 2026
-
-### 📋 **Phase 3: Observability** (Planned - v0.4.0)
-- OpenTelemetry integration
-- Prometheus metrics
-- Structured logging
-- **Timeline:** May 2026
-
-### 🔮 **Phase 4: Enterprise Features** (Planned - v0.5.0+)
-- Outbox pattern (transactional publishing)
-- Kafka broker support
-- Admin UI
-- Multi-cloud support
-- **Timeline:** June-August 2026
-
----
 
 ## 🎓 Competitive Landscape
 
@@ -312,76 +284,5 @@ ROI: 94% cost reduction per service
 **Positioning:** "Best-of-breed reliability for self-hosted event systems"
 
 ---
-
-## 🎯 Recommended Next Steps
-
-### For Pilot Deployment
-1. ✅ **Week 1:** Deploy Redis cluster (production-ready)
-2. ✅ **Week 2:** Migrate one non-critical service to Evora
-3. ✅ **Week 3:** Monitor metrics, tune configuration
-4. ✅ **Week 4:** Evaluate results, plan broader rollout
-
-### Success Metrics
-- **Incident reduction:** Target 90% reduction in event-related incidents
-- **Processing reliability:** Target 99.99% success rate
-- **Operational efficiency:** Target 50% reduction in manual intervention
-
-### Risk Mitigation
-- **Alpha status:** Redis backend is production-ready but v0.2.0 is early
-- **Mitigation:** Start with non-critical services, gradual rollout
-- **Rollback plan:** Keep legacy system running in parallel for 2 weeks
-
----
-
-## 💬 Questions & Answers
-
-### Q: Is this production-ready?
-**A:** The Redis backend is production-ready (v0.2.0). Start with pilot deployments.
-
-### Q: How does this compare to Kafka?
-**A:** Evora is broker-agnostic. Use Redis for simplicity, Kafka for scale. Evora adds reliability patterns on top.
-
-### Q: What's the learning curve?
-**A:** ~1 day for developers familiar with async Python. Comprehensive docs + examples included.
-
-### Q: What if Redis goes down?
-**A:** Messages are durable in streams. Consumer crashes are recovered automatically. Redis HA recommended.
-
-### Q: Can we use existing Kafka infrastructure?
-**A:** Kafka broker implementation is planned (v0.5.0+). Redis is currently the production-ready option.
-
-### Q: What about observability?
-**A:** Telemetry hooks are ready. OpenTelemetry integration coming in v0.4.0 (May 2026).
-
----
-
-## 📞 Contact & Support
-
-- **Documentation:** `/docs/` directory
-- **Quick Start:** `README.md`
-- **Examples:** `/examples/` directory
-- **Issues:** (Coming with OSS release)
-
----
-
-## 🎉 Summary
-
-**Evora makes event-driven reliability impossible to ignore.**
-
-Instead of:
-- ❌ Hoping developers remember idempotency
-- ❌ Debugging stuck messages at 3am
-- ❌ Losing failed events in the void
-
-You get:
-- ✅ Compile-time enforcement of best practices
-- ✅ Self-healing consumers
-- ✅ Full forensics for every failure
-
-**Status:** Redis backend production-ready (v0.2.0)  
-**Recommendation:** Pilot deployment on non-critical services  
-**ROI:** 94% cost reduction vs manual implementation  
-
----
-
+ 
 **Evora: Stop treating events like fire-and-forget. Start treating them like financial transactions.**
