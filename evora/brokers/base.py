@@ -18,7 +18,12 @@ class Message:
 
 class BaseBroker(Protocol):
     async def publish(
-        self, channel: str, *, value: bytes, key: str | None = None, headers: dict[str, str] | None = None
+        self,
+        channel: str,
+        *,
+        value: bytes,
+        key: str | None = None,
+        headers: dict[str, str] | None = None,
     ) -> None: ...
 
     async def run_consumer(
@@ -30,12 +35,12 @@ class BaseBroker(Protocol):
     ) -> None: ...
 
     async def schedule_retry(
-            self,
-            *,
-            msg: Message,
-            raw_value: bytes,
-            headers: dict[str, str],
-            attempt: int,
-            error_type: str,
-            error_message: str,
+        self,
+        *,
+        msg: Message,
+        raw_value: bytes,
+        headers: dict[str, str],
+        attempt: int,
+        error_type: str,
+        error_message: str,
     ) -> None: ...

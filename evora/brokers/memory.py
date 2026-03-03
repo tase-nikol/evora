@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import anyio
 from typing import Awaitable, Callable
+
+import anyio
 
 from .base import Message
 
@@ -39,7 +40,7 @@ class MemoryBroker:
         *,
         value: bytes,
         key: str | None = None,
-        headers: dict[str, str] | None = None
+        headers: dict[str, str] | None = None,
     ) -> None:
         """
         Publish a message to a channel.
@@ -59,7 +60,7 @@ class MemoryBroker:
         channels: list[str],
         handler: Callable[[Message], Awaitable[None]],
         *,
-        consumer_name: str
+        consumer_name: str,
     ) -> None:
         """
         Run a consumer that listens to the given channels and processes messages with the handler.

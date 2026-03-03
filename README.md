@@ -3,8 +3,10 @@
 **A production-grade event processing runtime with strict reliability guarantees.**
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![License: TBD](https://img.shields.io/badge/License-TBD-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Status: Alpha](https://img.shields.io/badge/Status-Alpha-orange.svg)](CHANGELOG.md)
+
+**📚 [Getting Started Guide](GETTING_STARTED.md) | [Documentation](docs/) | [Examples](examples/) | [Contributing](CONTRIBUTING.md)**
 
 ---
 
@@ -742,7 +744,7 @@ In-memory broker for tests, Redis for production, Kafka when you outgrow Redis.
 
 ## 🔮 Roadmap
 
-### ✅ Completed (v0.1.0)
+### ✅ Completed (v0.1.0 - v0.2.0)
 - Strict mode enforcement
 - Error classification
 - Durable retry (ZSET)
@@ -750,19 +752,51 @@ In-memory broker for tests, Redis for production, Kafka when you outgrow Redis.
 - Poison message detection
 - Consumer groups
 - Structured DLQ
-
-### 🚧 In Progress (v0.2.0)
 - Schema governance CLI
 - Breaking change detection
 - Compatibility checks
 
-### 📋 Planned (v0.3.0+)
+### 🚧 In Progress (v0.3.0)
+- Rabbit broker implementation
 - OpenTelemetry integration
 - Prometheus metrics
+- Structured logging
+
+### 📋 Planned (v0.4.0+)
 - Outbox pattern
-- Admin CLI tools
 - Kafka broker implementation
+- Admin CLI tools
 - Performance benchmarks
+- Message replay utilities
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Quick Start for Contributors
+
+```bash
+# Clone and setup
+git clone https://github.com/tase-nikol/evora.git
+cd evora
+python -m venv venv
+source venv/bin/activate
+pip install -e ".[dev]"
+
+# Run tests
+pytest
+
+# Run linting
+ruff check evora/
+```
+
+---
+
+## 📄 License
+
+Evora is released under the [MIT License](LICENSE). See LICENSE file for details.
 
 --- 
 ## 🙏 Acknowledgments
@@ -780,9 +814,9 @@ But **simpler than all of them** while maintaining production reliability.
 
 ## 🎯 Status
 
-**Current Version:** 0.1.0 (Alpha)  
+**Current Version:** 0.2.0 (Alpha)  
 **Production Status:** Redis backend production-ready  
-**Next Milestone:** Schema governance CLI (v0.2.0)
+**Next Milestone:** Rabbit Broker (v0.3.0)
 
 ---
 

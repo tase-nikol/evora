@@ -1,17 +1,17 @@
-import pytest
 from dataclasses import dataclass
 from typing import Any
 
+import pytest
 
 from evora.app import App, subscribe
 from evora.core import Event
-from evora.errors import RetryableError, FatalError
+from evora.errors import FatalError, RetryableError
 from evora.idempotency import IdempotencyPolicy
-
 
 # ==========================================================
 # Spy Telemetry
 # ==========================================================
+
 
 class SpyTelemetry:
     def __init__(self):
@@ -34,6 +34,7 @@ class SpyTelemetry:
 # ==========================================================
 # Fake Broker + Idempotency
 # ==========================================================
+
 
 class FakeBroker:
     def __init__(self):
@@ -66,6 +67,7 @@ class FakeIdempotencyStore:
 # Test Event
 # ==========================================================
 
+
 class TestEvent(Event):
     __version__ = 1
 
@@ -82,6 +84,7 @@ class TestEvent(Event):
 # ==========================================================
 # Helpers
 # ==========================================================
+
 
 @dataclass
 class FakeMessage:
@@ -115,6 +118,7 @@ def encode_event(app, event):
 # 1️⃣ Success
 # ==========================================================
 
+
 @pytest.mark.asyncio
 async def test_success_calls_telemetry():
     telemetry = SpyTelemetry()
@@ -139,13 +143,18 @@ async def test_success_calls_telemetry():
 # 2️⃣ Retry
 # ==========================================================
 
+
 @pytest.mark.asyncio
 async def test_retry_triggers_retry_hook():
     telemetry = SpyTelemetry()
     idempotency = FakeIdempotencyStore()
 
-    @subscribe(TestEvent, retry="exponential", max_attempts=3,
-               idempotency=IdempotencyPolicy(mode="event_id"))
+    @subscribe(
+        TestEvent,
+        retry="exponential",
+        max_attempts=3,
+        idempotency=IdempotencyPolicy(mode="event_id"),
+    )
     async def handler(event, ctx):
         raise RetryableError("temporary")
 
@@ -164,6 +173,7 @@ async def test_retry_triggers_retry_hook():
 # ==========================================================
 # 3️⃣ Fatal → DLQ
 # ==========================================================
+
 
 @pytest.mark.asyncio
 async def test_fatal_error_goes_to_dlq():
@@ -189,6 +199,7 @@ async def test_fatal_error_goes_to_dlq():
 # 4️⃣ Idempotency Skip
 # ==========================================================
 
+
 @pytest.mark.asyncio
 async def test_idempotency_skip():
     telemetry = SpyTelemetry()
@@ -212,13 +223,18 @@ async def test_idempotency_skip():
 # 5️⃣ Retry Exhaustion → DLQ
 # ==========================================================
 
+
 @pytest.mark.asyncio
 async def test_retry_exhaustion_goes_to_dlq():
     telemetry = SpyTelemetry()
     idempotency = FakeIdempotencyStore()
 
-    @subscribe(TestEvent, retry="exponential", max_attempts=1,
-               idempotency=IdempotencyPolicy(mode="event_id"))
+    @subscribe(
+        TestEvent,
+        retry="exponential",
+        max_attempts=1,
+        idempotency=IdempotencyPolicy(mode="event_id"),
+    )
     async def handler(event, ctx):
         raise RetryableError("fail")
 
@@ -236,6 +252,7 @@ async def test_retry_exhaustion_goes_to_dlq():
 # ==========================================================
 # 6️⃣ Publish Telemetry
 # ==========================================================
+
 
 @pytest.mark.asyncio
 async def test_publish_calls_telemetry():

@@ -56,10 +56,9 @@ Then the SDK pipeline does:
 
 **consume → deserialize → validate → idempotency → handler → ack/nack → retry/DLQ**
 
-****
 ## Roadmap
 
-### ✅ Completed (Weeks 1-4)
+### ✅ Completed (v0.1.0 - v0.2.0)
 
 -   ✅ Reliability enforcement refactor
 -   ✅ Error classification (Retryable/Fatal/Contract)
@@ -74,26 +73,28 @@ Then the SDK pipeline does:
     -   XCLAIM reclaim logic
     -   Delivery count enforcement
     -   Background PEL monitoring
+-   ✅ **Schema governance CLI**
+    -   Schema extraction from Pydantic models
+    -   Compatibility checking
+    -   Breaking change detection
+    -   Version enforcement
 
 **Current Status:** 🎯 **Redis backend is production-ready**
 
-### 🚧 In Progress (Weeks 5-6)
-
--   Schema governance CLI
--   Compatibility checks
--   Breaking change detection
-
-### 📋 Planned (Weeks 7-8)
-
--   Outbox implementation
--   Transactional publishing
-
-### 🔮 Future (Weeks 9-12)
-
--   OpenTelemetry integration (tracing, metrics)
+### 🚧 In Progress (v0.3.0)
+-   Rabbit broker implementation
+-   OpenTelemetry tracing integration
+-   Prometheus metrics export
 -   Structured logging
+
+### 📋 Planned (v0.4.0+)
+
+-   Outbox pattern implementation
+-   Transactional publishing
 -   Admin CLI tools
--   Example microservice
--   Chaos test scenarios
--   Documentation finalization
--   OSS launch
+-   Message replay utilities
+-   Kafka broker implementation
+-   Performance benchmarking suite
+-   Example microservice architecture
+-   Chaos engineering scenarios
+-   Enhanced documentation

@@ -40,6 +40,7 @@ class Envelope(BaseModel):
     #     }
     # }
 
+
 class Event(BaseModel):
     """
     Base typed event contract.
@@ -47,6 +48,7 @@ class Event(BaseModel):
     - __event_name__ determines routing / type.
     - __version__ used in dataschema + migrations later.
     """
+
     __event_name__: ClassVar[Optional[str]] = None
     __version__: ClassVar[int]  # REQUIRED: subclasses must set
 

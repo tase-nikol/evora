@@ -1,17 +1,17 @@
+import os
+import sys
+
 import anyio
 import redis.asyncio as redis
-
-import sys
-import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from evora.app import App, subscribe
+from evora.brokers.redis_streams import RedisStreamsBroker
 from evora.core import Event
+from evora.errors import RetryableError
 from evora.idempotency import IdempotencyPolicy
 from evora.idempotency_redis import RedisIdempotencyStore
-from evora.brokers.redis_streams import RedisStreamsBroker
-from evora.errors import RetryableError
 
 
 class UserCreated(Event):
@@ -20,7 +20,14 @@ class UserCreated(Event):
     email: str
 
 
-@subscribe(UserCreated, channel="users.events", idempotency=IdempotencyPolicy(ttl_seconds=3600), retry="exponential", max_attempts=5, dlq=True)
+@subscribe(
+    UserCreated,
+    channel="users.events",
+    idempotency=IdempotencyPolicy(ttl_seconds=3600),
+    retry="exponential",
+    max_attempts=5,
+    dlq=True,
+)
 async def handle_user_created(event: UserCreated, ctx):
     print("got", event)
     if event.user_id == 1:
@@ -42,6 +49,7 @@ async def main():
         await app.publish(UserCreated(user_id=1, email="a@b.com"), channel="users.events")
         await app.publish(UserCreated(user_id=2, email="c@d.com"), channel="users.events")
         await anyio.sleep(5)
+
 
 if __name__ == "__main__":
     anyio.run(main)
