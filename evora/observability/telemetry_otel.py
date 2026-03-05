@@ -1,10 +1,15 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from opentelemetry import metrics, trace
-from opentelemetry.metrics import Meter
-from opentelemetry.trace import Span, Tracer
+if TYPE_CHECKING:
+    from opentelemetry.metrics import Meter
+    from opentelemetry.trace import Span, Tracer
+
+try:
+    from opentelemetry import metrics, trace
+except ImportError:
+    pass  # opentelemetry is an optional dependency
 
 
 class OpenTelemetryTelemetry:
