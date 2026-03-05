@@ -18,7 +18,7 @@ This is a critical reliability feature that handles scenarios where:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Message Lifecycle                         │
+│                    Message Lifecycle                        │
 └─────────────────────────────────────────────────────────────┘
 
 1. Normal Processing
@@ -389,20 +389,4 @@ pending = await client.xpending_range(
 - `times_delivered`: How many times this message was delivered
 
 We use these to make reclaim/DLQ decisions.
-
----
-
-## 🎉 Summary
-
-You now have **production-grade poison message protection**:
-
-- Messages can't get stuck forever
-- Delivery limits prevent infinite loops  
-- Automatic reclaim for transient failures
-- DLQ routing with full metadata
-- Self-healing consumer groups
-- Zero manual intervention required
-
-This completes the **reliability core** of the Redis broker.
-
-**Your event runtime is now production-ready.**
+ 

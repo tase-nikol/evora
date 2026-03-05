@@ -720,12 +720,4 @@ class RedisStreamsBroker:
         consumer_name: str,
     ) -> None: ...
 ```
-
----
-
-## See Also
-
-- [Complete Guide](./REDIS_STREAMS_BROKER.md) - Full documentation
-- [Quick Start](./REDIS_STREAMS_QUICKSTART.md) - 5-minute tutorial
-- [Redis Streams Documentation](https://redis.io/docs/data-types/streams/)
-- [Redis Consumer Groups](https://redis.io/docs/data-types/streams-tutorial/#consumer-groups)
+ 
