@@ -218,7 +218,7 @@ async def handler(event, ctx):
 from evora.errors import RetryableError, FatalError, ContractError
 
 @subscribe(OrderEvent, idempotency=IdempotencyPolicy(...))
-async def process_order(event, ctx):
+async def process_order(event: OrderEvent, ctx):
     try:
         await payment_service.charge(event.data.order_id)
     
@@ -320,7 +320,7 @@ Background Poison Checker (every 10s):
         ttl_seconds=86400,    # 24 hours
     ),
 )
-async def charge_customer(event, ctx):
+async def charge_customer(event: PaymentEvent, ctx):
     # This will run EXACTLY ONCE per event ID
     # Even if:
     # - Message is redelivered
@@ -408,12 +408,12 @@ broker = RedisStreamsBroker(
 class UserEvent(Event):
     __version__ = 2  # Explicit version required
     
-    class Data(BaseModel):
+    class Data(BaseModel):  # Inner Data class defines schema
         user_id: int
         email: str
         name: str | None = None  # Made optional in v2
     
-    data: Data
+    data: Data  # Field using the inner Data class
 ```
 
 **Result:**
@@ -421,6 +421,59 @@ class UserEvent(Event):
 - Contract errors go to DLQ (not retried)
 - Version enforcement (strict mode)
 - Ready for schema evolution governance
+
+---
+
+### 9. Schema Governance CLI
+
+**Problem:** Breaking schema changes reach production undetected.
+
+**Solution:** Built-in CLI for compatibility checking.
+
+```bash
+# Check compatibility before deployment
+evora schema check baselines/user_event.json myapp/events.py:UserCreated
+
+# Export baseline for CI/CD
+evora schema export myapp/events.py:UserCreated -o user_event_baseline.json
+```
+
+**Compatibility Rules:**
+- ✅ **Non-breaking**: Optional fields added, fields made optional, enum values added
+- ❌ **Breaking**: Fields removed, fields made required, type changes, enum values removed
+
+**CI/CD Integration:**
+```yaml
+# .github/workflows/schema-check.yml
+- name: Check schema compatibility
+  run: |
+    evora schema check baselines/user_event.json myapp/events.py:UserCreated
+    evora schema check baselines/order_event.json myapp/events.py:OrderPlaced
+```
+
+**Output (text):**
+```
+❌ BREAKING CHANGES DETECTED
+
+  - email removed
+  - user_id: type changed integer → string
+
+Compatibility: NOT BACKWARD COMPATIBLE
+```
+
+**Output (JSON for CI):**
+```bash
+evora schema check old.json new.py:Event --format json
+# → {"ok": false, "breaking_changes": [...], "non_breaking_changes": [...]}
+```
+
+**Result:**
+- No manual schema review needed
+- Breaking changes blocked in CI
+- Version bump enforcement (`__version__` must increase)
+- Event type stability checks
+
+👉 **See [docs/SCHEMA_GOVERNANCE.md](docs/SCHEMA_GOVERNANCE.md) for complete CLI reference**
 
 ---
 
@@ -796,6 +849,7 @@ In-memory broker for tests, Redis for production, Kafka when you outgrow Redis.
 - **[docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md)** - API cheat sheet
 - **[docs/REDIS_STREAMS_API.md](docs/REDIS_STREAMS_API.md)** - Complete API reference
 - **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Common issues and solutions
+- **[docs/SCHEMA_GOVERNANCE.md](docs/SCHEMA_GOVERNANCE.md)** - Schema evolution and compatibility checking
 
 **Deep Dives:**
 - **[docs/POISON_MESSAGE_HANDLING.md](docs/POISON_MESSAGE_HANDLING.md)** - Poison detection internals

@@ -66,6 +66,13 @@ python app.py
 ```python
 # Check your event's event_type()
 class MyEvent(Event):
+    __version__ = 1
+    
+    class Data(BaseModel):
+        field: str
+    
+    data: Data
+    
     @classmethod
     def event_type(cls) -> str:
         return "users.events"  # Must match publish channel
@@ -385,12 +392,18 @@ evora schema check old.py:MyEvent new.py:MyEvent
 ```python
 # ❌ Wrong
 class MyEvent(Event):
-    data: MyData
+    class Data(BaseModel):
+        field: str
+    data: Data
 
 # ✅ Correct
 class MyEvent(Event):
     __version__ = 1
-    data: MyData
+    
+    class Data(BaseModel):
+        field: str
+    
+    data: Data
 ```
 
 #### 2. "Missing idempotency policy in strict mode"

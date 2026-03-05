@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import redis.asyncio as redis
 
-from .idempotency import IdempotencyStore
+from .base import IdempotencyStore
 
 
 @dataclass

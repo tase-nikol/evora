@@ -27,42 +27,6 @@ class RetryPolicy:
     jitter: bool = True
 
 
-class IdempotencyStore:
-    """
-    Abstract store for tracking idempotency of event handling.
-
-    Methods:
-        seen: Check if an event-handler pair has been seen.
-        mark_seen: Mark an event-handler pair as seen with an optional TTL.
-    """
-
-    async def seen(self, *, event_id: str, handler_name: str) -> bool:
-        """
-        Check if the given event_id and handler_name have already been processed.
-
-        Args:
-            event_id: Unique identifier for the event.
-            handler_name: Name of the handler.
-
-        Returns:
-            True if seen before, False otherwise.
-        """
-        return False
-
-    async def mark_seen(
-        self, *, event_id: str, handler_name: str, ttl_seconds: int = 86_400
-    ) -> None:
-        """
-        Mark the given event_id and handler_name as processed.
-
-        Args:
-            event_id: Unique identifier for the event.
-            handler_name: Name of the handler.
-            ttl_seconds: Time-to-live in seconds for the record.
-        """
-        return None
-
-
 def _compute_delay_ms(policy: RetryPolicy, attempt: int) -> int:
     """
     Compute the delay in milliseconds before the next retry attempt.

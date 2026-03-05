@@ -21,6 +21,9 @@ Diagnostic guide for common issues with step-by-step solutions and Redis command
 ### [POISON_MESSAGE_HANDLING.md](POISON_MESSAGE_HANDLING.md)
 Deep dive into poison message detection: how it works, configuration, and recovery flows.
 
+### [SCHEMA_GOVERNANCE.md](SCHEMA_GOVERNANCE.md)
+Complete guide to the Schema Governance CLI for managing event schema evolution, compatibility checking, and CI/CD integration.
+
 ## 🎯 Where to Start
 
 **New to Evora?**
@@ -34,6 +37,9 @@ Deep dive into poison message detection: how it works, configuration, and recove
 
 **Want Redis details?**
 → Read [REDIS_STREAMS_API.md](REDIS_STREAMS_API.md)
+
+**Managing schema evolution?**
+→ Check [SCHEMA_GOVERNANCE.md](SCHEMA_GOVERNANCE.md)
 
 **Contributing?**
 → Follow [CONTRIBUTING](../CONTRIBUTING.md)

@@ -10,7 +10,7 @@ from evora.brokers.redis_streams import RedisStreamsBroker
 from evora.core import Event
 from evora.errors import RetryableError
 from evora.idempotency import IdempotencyPolicy
-from evora.idempotency_redis import RedisIdempotencyStore
+from evora.idempotency.redis_store import RedisIdempotencyStore
 from evora.observability import SimpleMetricsTelemetry
 
 

@@ -7,6 +7,7 @@ from evora.app import App, subscribe
 from evora.core import Event
 from evora.errors import FatalError, RetryableError
 from evora.idempotency import IdempotencyPolicy
+from evora.observability.telemetry import NoopTelemetry
 
 # ==========================================================
 # Spy Telemetry
@@ -268,3 +269,89 @@ async def test_publish_calls_telemetry():
     await app.publish(TestEvent())
 
     assert any(e[0] == "publish" for e in telemetry.events)
+
+
+def test_noop_telemetry_on_consume_start():
+    """Test NoopTelemetry.on_consume_start returns None."""
+    telemetry = NoopTelemetry()
+
+    token = telemetry.on_consume_start(
+        service="test-service",
+        event_type="TestEvent",
+        handler="test.handler",
+        event_id="event-123",
+        attempt=1,
+        attrs={"channel": "test-channel"},
+    )
+
+    assert token is None
+
+
+def test_noop_telemetry_on_consume_end():
+    """Test NoopTelemetry.on_consume_end returns None."""
+    telemetry = NoopTelemetry()
+
+    result = telemetry.on_consume_end(
+        token=None,
+        outcome="success",
+        error=None,
+    )
+
+    assert result is None
+
+
+def test_noop_telemetry_on_consume_end_with_error():
+    """Test NoopTelemetry.on_consume_end with error returns None."""
+    telemetry = NoopTelemetry()
+
+    result = telemetry.on_consume_end(
+        token=None,
+        outcome="error",
+        error=ValueError("test error"),
+    )
+
+    assert result is None
+
+
+def test_noop_telemetry_on_retry_scheduled():
+    """Test NoopTelemetry.on_retry_scheduled returns None."""
+    telemetry = NoopTelemetry()
+
+    result = telemetry.on_retry_scheduled(
+        service="test-service",
+        event_type="TestEvent",
+        handler="test.handler",
+        event_id="event-123",
+        attempt=1,
+        next_attempt=2,
+    )
+
+    assert result is None
+
+
+def test_noop_telemetry_on_publish():
+    """Test NoopTelemetry.on_publish returns None."""
+    telemetry = NoopTelemetry()
+
+    result = telemetry.on_publish(
+        service="test-service",
+        event_type="TestEvent",
+        channel="test-channel",
+    )
+
+    assert result is None
+
+
+def test_noop_telemetry_all_outcomes():
+    """Test NoopTelemetry handles all outcome types."""
+    telemetry = NoopTelemetry()
+
+    outcomes = ["success", "retry", "dlq", "skip", "error"]
+
+    for outcome in outcomes:
+        result = telemetry.on_consume_end(
+            token=None,
+            outcome=outcome,
+            error=None,
+        )
+        assert result is None
