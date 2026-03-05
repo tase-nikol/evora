@@ -45,15 +45,19 @@ def subscribe(
     """
 
     def decorator(fn: Callable[..., Awaitable[None]]) -> Callable[..., Awaitable[None]]:
-        setattr(fn, "__evora_spec__", {
-            "event_cls": event_cls,
-            "channel": channel,
-            "retry": RetryPolicy(strategy=retry, max_attempts=max_attempts)
-            if isinstance(retry, str)
-            else retry,
-            "dlq": dlq,
-            "idempotency": idempotency,
-        })
+        setattr(
+            fn,
+            "__evora_spec__",
+            {
+                "event_cls": event_cls,
+                "channel": channel,
+                "retry": RetryPolicy(strategy=retry, max_attempts=max_attempts)
+                if isinstance(retry, str)
+                else retry,
+                "dlq": dlq,
+                "idempotency": idempotency,
+            },
+        )
         return fn
 
     return decorator

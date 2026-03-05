@@ -79,4 +79,3 @@ class NoopTelemetry:
         channel: str,
     ) -> None:
         return None
-

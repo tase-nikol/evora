@@ -526,7 +526,11 @@ class RedisStreamsBroker:
 
         return Message(
             channel=channel,
-            value=raw if isinstance(raw, bytes) else bytes(raw) if isinstance(raw, bytearray) else bytes(str(raw), 'utf-8'),
+            value=raw
+            if isinstance(raw, bytes)
+            else bytes(raw)
+            if isinstance(raw, bytearray)
+            else bytes(str(raw), "utf-8"),
             headers=headers,
             key=key,
             message_id=msg_id.decode("utf-8")
@@ -536,7 +540,11 @@ class RedisStreamsBroker:
         )
 
     async def _process_one(
-        self, msg: Message, handler: Callable[[Message], Awaitable[None]], *, raw_msg_id: str | bytes
+        self,
+        msg: Message,
+        handler: Callable[[Message], Awaitable[None]],
+        *,
+        raw_msg_id: str | bytes,
     ) -> None:
         """
         Process a single message with poison detection and error handling.
@@ -734,7 +742,10 @@ class RedisStreamsBroker:
             - App.publish(): Higher-level publishing API
         """
         # Redis Streams store fields as a dict of string->string/bytes
-        fields: dict[bytes | bytearray | memoryview | str | int | float, bytes | bytearray | memoryview | str | int | float] = {
+        fields: dict[
+            bytes | bytearray | memoryview | str | int | float,
+            bytes | bytearray | memoryview | str | int | float,
+        ] = {
             b"v": value,
             b"k": (key or "").encode("utf-8"),
             b"h": json.dumps(headers or {}).encode("utf-8"),
@@ -1017,7 +1028,10 @@ class RedisStreamsBroker:
                             m = m.decode("utf-8")
                         payload = json.loads(m)
 
-                        fields: dict[bytes | bytearray | memoryview | str | int | float, bytes | bytearray | memoryview | str | int | float] = {
+                        fields: dict[
+                            bytes | bytearray | memoryview | str | int | float,
+                            bytes | bytearray | memoryview | str | int | float,
+                        ] = {
                             b"v": payload["v"].encode("utf-8"),
                             b"k": payload.get("k", "").encode("utf-8"),
                             b"h": json.dumps(payload.get("h", {})).encode("utf-8"),
@@ -1123,7 +1137,9 @@ class RedisStreamsBroker:
                     continue  # loop back to reclaim again quickly
 
                 # 2) If no reclaimed work, read new messages
-                streams: dict[bytes | str | memoryview, int | bytes | str | memoryview] = {ch: ">" for ch in channels}
+                streams: dict[bytes | str | memoryview, int | bytes | str | memoryview] = {
+                    ch: ">" for ch in channels
+                }
                 resp = await self.client.xreadgroup(
                     groupname=self.group_id,
                     consumername=self._consumer(),

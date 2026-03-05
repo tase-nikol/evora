@@ -36,7 +36,9 @@ def _resolve_refs(schema: dict[str, Any], defs: dict[str, Any]) -> dict[str, Any
         if isinstance(v, dict):
             resolved[k] = _resolve_refs(v, defs)
         elif isinstance(v, list):
-            resolved_list: list[Any] = [_resolve_refs(i, defs) if isinstance(i, dict) else i for i in v]
+            resolved_list: list[Any] = [
+                _resolve_refs(i, defs) if isinstance(i, dict) else i for i in v
+            ]
             resolved[k] = resolved_list
         else:
             resolved[k] = v
