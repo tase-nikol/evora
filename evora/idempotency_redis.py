@@ -16,7 +16,8 @@ class RedisIdempotencyStore(IdempotencyStore):
         return f"{self.prefix}:{scope}:{event_id}"
 
     async def seen(self, *, scope: str, event_id: str) -> bool:
-        return await self.client.exists(self._key(scope, event_id)) == 1
+        result = await self.client.exists(self._key(scope, event_id))
+        return bool(result)
 
     async def mark_seen(self, *, scope: str, event_id: str, ttl_seconds: int) -> None:
         # SET key "1" NX EX ttl

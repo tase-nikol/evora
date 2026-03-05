@@ -78,7 +78,7 @@ def _compute_delay_ms(attempt: int, base: int = 500, max_delay: int = 30000) -> 
         30000
     """
     delay = base * (2 ** (attempt - 1))
-    return min(delay, max_delay)
+    return int(min(delay, max_delay))
 
 
 @dataclass
@@ -315,7 +315,7 @@ class RedisStreamsBroker:
         *,
         min_idle_ms: int,
         count: int = 50,
-    ) -> list[tuple[str, dict]]:
+    ) -> list[tuple[str | bytes, dict[bytes | str, bytes | str]]]:
         """
         Reclaim stuck messages from the Pending Entry List (PEL) to prevent poison messages.
 
@@ -431,7 +431,9 @@ class RedisStreamsBroker:
         )
         return [(mid, fields) for (mid, fields) in claimed]
 
-    async def _decode_entry(self, channel: str, msg_id, fields) -> Message | None:
+    async def _decode_entry(
+        self, channel: str, msg_id: str | bytes, fields: dict[bytes | str, bytes | str]
+    ) -> Message | None:
         """
         Decode raw Redis Stream entry fields into a typed Message object.
 
@@ -504,8 +506,8 @@ class RedisStreamsBroker:
             return None
 
         key_b = fields.get(b"k") or fields.get("k") or b""
-        key = key_b.decode("utf-8") if isinstance(key_b, (bytes, bytearray)) else str(key_b)
-        key = key or None
+        key_str = key_b.decode("utf-8") if isinstance(key_b, (bytes, bytearray)) else str(key_b)
+        key = key_str if key_str else None
 
         attempt_b = fields.get(b"a") or fields.get("a") or b"1"
         attempt = (
@@ -524,7 +526,7 @@ class RedisStreamsBroker:
 
         return Message(
             channel=channel,
-            value=raw if isinstance(raw, (bytes, bytearray)) else bytes(raw),
+            value=raw if isinstance(raw, bytes) else bytes(raw) if isinstance(raw, bytearray) else bytes(str(raw), 'utf-8'),
             headers=headers,
             key=key,
             message_id=msg_id.decode("utf-8")
@@ -533,7 +535,9 @@ class RedisStreamsBroker:
             attempt=attempt,
         )
 
-    async def _process_one(self, msg: Message, handler, *, raw_msg_id) -> None:
+    async def _process_one(
+        self, msg: Message, handler: Callable[[Message], Awaitable[None]], *, raw_msg_id: str | bytes
+    ) -> None:
         """
         Process a single message with poison detection and error handling.
 
@@ -730,7 +734,7 @@ class RedisStreamsBroker:
             - App.publish(): Higher-level publishing API
         """
         # Redis Streams store fields as a dict of string->string/bytes
-        fields: dict[bytes, bytes] = {
+        fields: dict[bytes | bytearray | memoryview | str | int | float, bytes | bytearray | memoryview | str | int | float] = {
             b"v": value,
             b"k": (key or "").encode("utf-8"),
             b"h": json.dumps(headers or {}).encode("utf-8"),
@@ -1013,7 +1017,7 @@ class RedisStreamsBroker:
                             m = m.decode("utf-8")
                         payload = json.loads(m)
 
-                        fields: dict[bytes, bytes] = {
+                        fields: dict[bytes | bytearray | memoryview | str | int | float, bytes | bytearray | memoryview | str | int | float] = {
                             b"v": payload["v"].encode("utf-8"),
                             b"k": payload.get("k", "").encode("utf-8"),
                             b"h": json.dumps(payload.get("h", {})).encode("utf-8"),
@@ -1101,7 +1105,7 @@ class RedisStreamsBroker:
             """
             while True:
                 # 1) First drain reclaimed stuck messages (a little), then read new ones
-                reclaimed_work: list[tuple[str, str, dict]] = []
+                reclaimed_work: list[tuple[str, str | bytes, dict[bytes | str, bytes | str]]] = []
 
                 for ch in channels:
                     reclaimed = await self._reclaim_stuck(
@@ -1119,7 +1123,7 @@ class RedisStreamsBroker:
                     continue  # loop back to reclaim again quickly
 
                 # 2) If no reclaimed work, read new messages
-                streams = {ch: ">" for ch in channels}
+                streams: dict[bytes | str | memoryview, int | bytes | str | memoryview] = {ch: ">" for ch in channels}
                 resp = await self.client.xreadgroup(
                     groupname=self.group_id,
                     consumername=self._consumer(),

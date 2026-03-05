@@ -39,13 +39,13 @@ def subscribe(
     max_attempts: int = 5,
     dlq: bool = True,
     idempotency: IdempotencyPolicy | None = None,  # REQUIRED in strict mode
-):
+) -> Callable[[Callable[..., Awaitable[None]]], Callable[..., Awaitable[None]]]:
     """
     Strict mode: idempotency policy is required; missing => startup error.
     """
 
-    def decorator(fn: Callable[..., Awaitable[None]]):
-        fn.__evora_spec__ = {
+    def decorator(fn: Callable[..., Awaitable[None]]) -> Callable[..., Awaitable[None]]:
+        setattr(fn, "__evora_spec__", {
             "event_cls": event_cls,
             "channel": channel,
             "retry": RetryPolicy(strategy=retry, max_attempts=max_attempts)
@@ -53,7 +53,7 @@ def subscribe(
             else retry,
             "dlq": dlq,
             "idempotency": idempotency,
-        }
+        })
         return fn
 
     return decorator
@@ -77,7 +77,7 @@ class App:
 
         self.registry = Registry()
         self.idempotency_store = idempotency_store
-        self.telemetry = telemetry or NoopTelemetry()
+        self.telemetry: Telemetry = telemetry or NoopTelemetry()
 
         self._handlers: list[HandlerSpec] = []
 
@@ -224,7 +224,7 @@ class App:
                 event_type=envelope.type,
                 handler=handler_name,
                 event_id=envelope.id,
-                attempt=envelope.meta.get("attempt") if envelope.meta else None,
+                attempt=int(envelope.meta.get("attempt", 1)) if envelope.meta else 1,
                 attrs={
                     "channel": msg.channel,
                     "schema": envelope.dataschema,

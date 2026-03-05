@@ -4,7 +4,7 @@ from typing import Any
 
 from opentelemetry import metrics, trace
 from opentelemetry.metrics import Meter
-from opentelemetry.trace import Span
+from opentelemetry.trace import Span, Tracer
 
 
 class OpenTelemetryTelemetry:
@@ -12,7 +12,7 @@ class OpenTelemetryTelemetry:
     OpenTelemetry implementation for Evora.
     """
 
-    def __init__(self, tracer=None, meter: Meter | None = None) -> None:
+    def __init__(self, tracer: Tracer | None = None, meter: Meter | None = None) -> None:
         self.tracer = tracer or trace.get_tracer("evora")
         self.meter = meter or metrics.get_meter("evora")
 
@@ -21,10 +21,6 @@ class OpenTelemetryTelemetry:
         self._retry_counter = self.meter.create_counter("evora_retry_total")
         self._publish_counter = self.meter.create_counter("evora_publish_total")
         self._duration_histogram = self.meter.create_histogram("evora_handler_duration_seconds")
-
-    # ----------------------------
-    # Telemetry API
-    # ----------------------------
 
     def on_consume_start(
         self,

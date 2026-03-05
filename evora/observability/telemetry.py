@@ -45,9 +45,38 @@ class Telemetry(Protocol):
 
 class NoopTelemetry:
     def on_consume_start(
-        self, *, event_type: str, handler: str, event_id: str, attrs: dict[str, Any]
+        self,
+        *,
+        service: str,
+        event_type: str,
+        handler: str,
+        event_id: str,
+        attempt: int,
+        attrs: dict[str, Any],
     ) -> Any:
         return None
 
     def on_consume_end(self, token: Any, *, outcome: str, error: Exception | None = None) -> None:
         return None
+
+    def on_retry_scheduled(
+        self,
+        *,
+        service: str,
+        event_type: str,
+        handler: str,
+        event_id: str,
+        attempt: int,
+        next_attempt: int,
+    ) -> None:
+        return None
+
+    def on_publish(
+        self,
+        *,
+        service: str,
+        event_type: str,
+        channel: str,
+    ) -> None:
+        return None
+

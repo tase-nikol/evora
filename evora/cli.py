@@ -241,7 +241,7 @@ def _load_event_or_baseline(ref: str, *, allow_baseline: bool) -> Tuple[Any, dic
     return event_cls, meta
 
 
-def _load_event(ref: str):
+def _load_event(ref: str) -> Any:
     """
     Load event class from:
       1) module.path:ClassName
@@ -263,7 +263,7 @@ def _load_event(ref: str):
     return getattr(module, class_name)
 
 
-def _load_from_file(path: str, class_name: str):
+def _load_from_file(path: str, class_name: str) -> Any:
     path = os.path.abspath(path)
     if not os.path.exists(path):
         raise FileNotFoundError(f"File not found: {path}")

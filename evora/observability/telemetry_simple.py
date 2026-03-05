@@ -16,8 +16,8 @@ class SimpleMetricsTelemetry:
     """
 
     def __init__(self) -> None:
-        self.counters = defaultdict(int)
-        self.durations = defaultdict(list)
+        self.counters: defaultdict[str, int] = defaultdict(int)
+        self.durations: defaultdict[str, list[float]] = defaultdict(list)
 
     # ----------------------------
     # Helpers

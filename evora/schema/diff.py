@@ -6,8 +6,8 @@ from .compatibility import CompatibilityResult
 
 
 def compare_schemas(old: dict[str, Any], new: dict[str, Any]) -> CompatibilityResult:
-    breaking = []
-    non_breaking = []
+    breaking: list[str] = []
+    non_breaking: list[str] = []
 
     _compare_objects(old, new, path="", breaking=breaking, non_breaking=non_breaking)
 
