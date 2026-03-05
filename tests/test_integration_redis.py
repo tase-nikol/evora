@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import pytest
 import redis.asyncio as redis
@@ -11,8 +12,6 @@ from evora.errors import RetryableError
 from evora.idempotency import IdempotencyPolicy
 from evora.idempotency_redis import RedisIdempotencyStore
 from evora.observability import SimpleMetricsTelemetry
-
-import os
 
 
 class TestEvent(Event):
