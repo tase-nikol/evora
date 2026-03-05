@@ -1,19 +1,15 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from opentelemetry.metrics import Meter
+    from opentelemetry.trace import Span, Tracer
 
 try:
     from opentelemetry import metrics, trace
-    from opentelemetry.metrics import Meter
-    from opentelemetry.trace import Span, Tracer
 except ImportError:
-    # opentelemetry is an optional dependency
-    # Define placeholder types for type checking
-    Meter = Any  # type: ignore[misc,assignment]
-    Span = Any  # type: ignore[misc,assignment]
-    Tracer = Any  # type: ignore[misc,assignment]
-    metrics = None  # type: ignore[assignment]
-    trace = None  # type: ignore[assignment]
+    pass  # opentelemetry is an optional dependency
 
 
 class OpenTelemetryTelemetry:
