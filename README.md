@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Status: Alpha](https://img.shields.io/badge/Status-Alpha-orange.svg)](CHANGELOG.md)
 
-**📚 [Getting Started Guide](GETTING_STARTED.md) | [Documentation](docs/) | [Examples](examples/) | [Contributing](CONTRIBUTING.md)**
+**📚 [Documentation](docs/) | [Examples](examples/) | [Contributing](CONTRIBUTING.md)**
 
 ---
 
@@ -33,6 +33,48 @@ Evora makes reliability **impossible to ignore**:
 - ✅ **Poison message detection** - Automatic recovery from stuck processing
 - ✅ **Structured DLQ** - Full forensics for every failure
 - ✅ **Self-healing consumers** - Automatic reclaim of idle messages
+
+---
+
+## 🏗️ Architecture
+
+Evora consists of three layers:
+
+```
+┌─────────────────────────────────────────────┐
+│           Application Layer                 │
+│  • Event decoding/validation                │
+│  • Idempotency enforcement                  │
+│  • Error classification                     │
+│  • Handler dispatch                         │
+└──────────────────┬──────────────────────────┘
+                   │
+┌──────────────────▼──────────────────────────┐
+│           Broker Layer                      │
+│  • Redis Streams (production)               │
+│  • Durable retry scheduler                  │
+│  • Poison message detector                  │
+│  • Consumer group coordination              │
+└──────────────────┬──────────────────────────┘
+                   │
+┌──────────────────▼──────────────────────────┐
+│           Storage Layer (Redis)             │
+│  • Event streams                            │
+│  • Retry delay queues (ZSET)                │
+│  • Idempotency store (SET)                  │
+│  • Dead letter queue                        │
+└─────────────────────────────────────────────┘
+```
+
+**Key Components:**
+- **`evora.core`**: Event contracts, envelopes, registry
+- **`evora.app`**: Application runtime, handler registry, `@subscribe` decorator
+- **`evora.brokers`**: Broker implementations (Redis, Memory)
+- **`evora.runtime`**: Retry policies, execution logic
+- **`evora.idempotency`**: Deduplication interfaces and Redis store
+- **`evora.errors`**: Error classification (Retryable/Fatal/Contract)
+- **`evora.schema`**: Schema governance tools and CLI
+- **`evora.observability`**: Telemetry hooks (OpenTelemetry ready)
 
 ---
 
@@ -388,7 +430,7 @@ class UserEvent(Event):
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      Publisher                               │
+│                      Publisher                              │
 └───────────────────────────┬─────────────────────────────────┘
                             │
                             ▼
@@ -397,9 +439,9 @@ class UserEvent(Event):
                     └───────┬───────┘
                             │
                             ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Consumer Group                            │
-│                                                              │
+┌────────────────────────────────────────────────────────────┐
+│                    Consumer Group                          │
+│                                                            │
 │  ┌────────────────────────────────────────────────────┐    │
 │  │           Main Consumer Loop                       │    │
 │  │  • XREADGROUP                                      │    │
@@ -408,21 +450,21 @@ class UserEvent(Event):
 │  │  • Execute handler                                 │    │
 │  │  • XACK on success                                 │    │
 │  └────────────────────────────────────────────────────┘    │
-│                                                              │
+│                                                            │
 │  ┌────────────────────────────────────────────────────┐    │
 │  │          Retry Scheduler (background)              │    │
 │  │  • Poll ZSET every 500ms                           │    │
 │  │  • XADD due retries back to stream                 │    │
 │  │  • ZREM from retry queue                           │    │
 │  └────────────────────────────────────────────────────┘    │
-│                                                              │
+│                                                            │
 │  ┌────────────────────────────────────────────────────┐    │
 │  │          Poison Checker (background)               │    │
 │  │  • Scan XPENDING every 10s                         │    │
 │  │  • XCLAIM idle messages (< max deliveries)         │    │
 │  │  • DLQ poison messages (>= max deliveries)         │    │
 │  └────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────┘
                             │
                     ┌───────┴────────┐
                     │                │
@@ -739,6 +781,27 @@ Structured DLQ, telemetry hooks, and full message forensics.
 > "Start simple, scale when needed."
 
 In-memory broker for tests, Redis for production, Kafka when you outgrow Redis.
+
+---
+
+## 📚 Documentation
+
+**Essential Docs:**
+- **[README.md](README.md)** (you are here) - Overview, quick start, and core concepts
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and what's new
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute
+- **[LICENSE](LICENSE)** - MIT License
+
+**Reference Docs:**
+- **[docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md)** - API cheat sheet
+- **[docs/REDIS_STREAMS_API.md](docs/REDIS_STREAMS_API.md)** - Complete API reference
+- **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Common issues and solutions
+
+**Deep Dives:**
+- **[docs/POISON_MESSAGE_HANDLING.md](docs/POISON_MESSAGE_HANDLING.md)** - Poison detection internals
+
+**Examples:**
+- **[examples/](examples/)** - Working code examples with README
 
 ---
 
